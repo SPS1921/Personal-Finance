@@ -102,7 +102,7 @@ export async function getBudgetUtilization(userId: string) {
     prisma.budget.findMany({ where: { userId } }),
     getCategoryBreakdown(userId),
   ]);
-  const map = new Map(breakdown.map((b) => [b.category, b.amount]));
+  const map = new Map<string, number>(breakdown.map((b) => [b.category as string, b.amount]));
   return budgets.map((b) => {
     const spent = map.get(b.category) ?? 0;
     const amount = toNumber(b.amount);

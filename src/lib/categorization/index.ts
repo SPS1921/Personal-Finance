@@ -12,10 +12,10 @@ async function loadRules(userId: string | null): Promise<Rule[]> {
     where: { OR: [{ isGlobal: true }, { userId: userId ?? undefined }] },
     orderBy: [{ priority: "desc" }, { createdAt: "desc" }],
   });
-  const rules = rows.map((r) => ({
+  const rules: Rule[] = rows.map((r) => ({
     pattern: new RegExp(r.pattern, "i"),
     merchant: r.merchant,
-    category: r.category,
+    category: r.category as Category,
     priority: r.priority,
   }));
   cache = { userId, rules, expires: Date.now() + TTL_MS };
