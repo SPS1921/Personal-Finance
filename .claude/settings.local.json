@@ -8,7 +8,10 @@
       "Bash(npm run *)",
       "Bash(curl -s -o /tmp/dash.html -w \"HTTP %{http_code}\\\\n\" http://localhost:3000/dashboard)",
       "Bash(curl -s -o /tmp/analytics.json -w \"HTTP %{http_code}\\\\n\" http://localhost:3000/api/analytics)",
-      "Read(//tmp/**)"
+      "Read(//tmp/**)",
+      "Bash(git add *)",
+      "Bash(git commit -q -m ' *)",
+      "Bash(git push *)"
     ]
   }
 }
