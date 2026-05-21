@@ -1,0 +1,11 @@
+{
+  "framework": "nextjs",
+  "buildCommand": "prisma generate && next build",
+  "regions": ["bom1"],
+  "functions": {
+    "src/app/api/import/csv/route.ts": { "maxDuration": 60 },
+    "src/app/api/import/excel/route.ts": { "maxDuration": 60 },
+    "src/app/api/import/pdf/route.ts": { "maxDuration": 90 },
+    "src/app/api/import/receipt/route.ts": { "maxDuration": 120 }
+  }
+}

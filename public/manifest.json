@@ -1,0 +1,9 @@
+{
+  "name": "Finance OS",
+  "short_name": "FinanceOS",
+  "description": "AI-powered personal finance operating system",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0a0b",
+  "theme_color": "#0a0a0b"
+}

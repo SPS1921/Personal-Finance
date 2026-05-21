@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dir)",
+      "PowerShell(node --version; npm --version; \\(Get-Command psql -ErrorAction SilentlyContinue\\).Source; \\(Get-Command docker -ErrorAction SilentlyContinue\\).Source)",
+      "Bash(npm install *)",
+      "Bash(npx tsx *)",
+      "Bash(npm run *)",
+      "Bash(curl -s -o /tmp/dash.html -w \"HTTP %{http_code}\\\\n\" http://localhost:3000/dashboard)",
+      "Bash(curl -s -o /tmp/analytics.json -w \"HTTP %{http_code}\\\\n\" http://localhost:3000/api/analytics)",
+      "Read(//tmp/**)"
+    ]
+  }
+}

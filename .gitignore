@@ -1,0 +1,12 @@
+node_modules
+.next
+.env
+.env.local
+.vercel
+dist
+out
+*.log
+.DS_Store
+prisma/dev.db
+public/sw.js
+public/workbox-*.js

@@ -1,0 +1,279 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id               String         @id @default(cuid())
+  email            String         @unique
+  name             String?
+  image            String?
+  currency         String         @default("INR")
+  timezone         String         @default("Asia/Kolkata")
+  emailVerified    DateTime?
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+
+  accounts         Account[]
+  authAccounts     AuthAccount[]
+  sessions         Session[]
+  transactions     Transaction[]
+  budgets          Budget[]
+  incomes          IncomeSource[]
+  debts            Debt[]
+  goals            Goal[]
+  notifications    Notification[]
+  importJobs       ImportJob[]
+  uploadedFiles    UploadedFile[]
+  merchantRules    MerchantRule[]
+  mappingTemplates MappingTemplate[]
+}
+
+model AuthAccount {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Account {
+  id           String        @id @default(cuid())
+  userId       String
+  name         String
+  type         String
+  institution  String?
+  last4        String?
+  balance      Float         @default(0)
+  currency     String        @default("INR")
+  isPrimary    Boolean       @default(false)
+  archived     Boolean       @default(false)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions Transaction[]
+
+  @@index([userId])
+}
+
+model Transaction {
+  id            String       @id @default(cuid())
+  userId        String
+  accountId     String?
+  type          String
+  amount        Float
+  currency      String       @default("INR")
+  category      String       @default("MISC")
+  merchant      String?
+  merchantKey   String?
+  notes         String?
+  paymentMode   String       @default("OTHER")
+  occurredAt    DateTime
+  isRecurring   Boolean      @default(false)
+  recurringId   String?
+  importJobId   String?
+  receiptUrl    String?
+  tags          String       @default("[]")
+  confidence    Float        @default(1.0)
+  hash          String       @unique
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  account     Account?   @relation(fields: [accountId], references: [id])
+  importJob   ImportJob? @relation(fields: [importJobId], references: [id])
+
+  @@index([userId, occurredAt])
+  @@index([userId, category])
+  @@index([userId, type])
+}
+
+model Budget {
+  id          String   @id @default(cuid())
+  userId      String
+  category    String
+  amount      Float
+  period      String   @default("MONTHLY")
+  startDate   DateTime @default(now())
+  rollover    Boolean  @default(false)
+  alertAt     Float    @default(0.8)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, category, period])
+  @@index([userId])
+}
+
+model IncomeSource {
+  id          String    @id @default(cuid())
+  userId      String
+  name        String
+  type        String    @default("SALARY")
+  amount      Float
+  frequency   String    @default("MONTHLY")
+  nextDate    DateTime?
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Debt {
+  id            String   @id @default(cuid())
+  userId        String
+  name          String
+  type          String
+  lender        String?
+  principal     Float
+  outstanding   Float
+  interestRate  Float
+  emiAmount     Float
+  tenureMonths  Int
+  startDate     DateTime
+  dueDay        Int      @default(1)
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Goal {
+  id            String   @id @default(cuid())
+  userId        String
+  name          String
+  emoji         String?
+  targetAmount  Float
+  savedAmount   Float    @default(0)
+  deadline      DateTime
+  status        String   @default("ACTIVE")
+  monthlyTarget Float?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String
+  title     String
+  body      String
+  meta      String?
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, read])
+}
+
+model ImportJob {
+  id            String        @id @default(cuid())
+  userId        String
+  source        String
+  status        String        @default("PENDING")
+  fileId        String?
+  totalRows     Int           @default(0)
+  importedRows  Int           @default(0)
+  duplicateRows Int           @default(0)
+  failedRows    Int           @default(0)
+  confidence    Float         @default(0)
+  errorLog      String?
+  mapping       String?
+  startedAt     DateTime      @default(now())
+  finishedAt    DateTime?
+
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  file         UploadedFile? @relation(fields: [fileId], references: [id])
+  transactions Transaction[]
+
+  @@index([userId, status])
+}
+
+model UploadedFile {
+  id           String      @id @default(cuid())
+  userId       String
+  filename     String
+  size         Int
+  mimeType     String
+  storageKey   String
+  storageUrl   String?
+  checksum     String?
+  createdAt    DateTime    @default(now())
+
+  user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  importJobs ImportJob[]
+
+  @@index([userId])
+}
+
+model MerchantRule {
+  id          String   @id @default(cuid())
+  userId      String?
+  pattern     String
+  merchant    String
+  category    String
+  isGlobal    Boolean  @default(false)
+  priority    Int      @default(0)
+  createdAt   DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([pattern])
+}
+
+model MappingTemplate {
+  id        String   @id @default(cuid())
+  userId    String
+  name      String
+  source    String
+  mapping   String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, name])
+}
